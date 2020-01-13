@@ -1,6 +1,7 @@
 {
 	"name": "DeleteFiles",
 	"properties": {
+		"description": "pipeline to delete.",
 		"activities": [
 			{
 				"name": "GetFileList",
