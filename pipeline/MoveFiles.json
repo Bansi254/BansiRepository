@@ -42,7 +42,7 @@
 			},
 			{
 				"name": "ForEachFile",
-				"description": "Iterate each file, and move them one by one.",
+				"description": "Iterate each file, and move them.",
 				"type": "ForEach",
 				"dependsOn": [
 					{
