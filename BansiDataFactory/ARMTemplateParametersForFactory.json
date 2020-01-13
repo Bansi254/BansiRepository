@@ -1,0 +1,33 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "BansiDataFactory"
+		},
+		"ADLSGen2_accountKey": {
+			"value": ""
+		},
+		"AzureSqlDWLinkService_connectionString": {
+			"value": ""
+		},
+		"AzureSqlDatabaseLinkService_connectionString": {
+			"value": ""
+		},
+		"AzureSqlSampleDatabase_connectionString": {
+			"value": ""
+		},
+		"AzureSqlSampleDatabaseLinkService_connectionString": {
+			"value": ""
+		},
+		"AzureStorageLinkedService_connectionString": {
+			"value": ""
+		},
+		"YashAzureBlobStorage_connectionString": {
+			"value": ""
+		},
+		"ADLSGen2_properties_typeProperties_url": {
+			"value": "https://yashtechstorageaccount.dfs.core.windows.net"
+		}
+	}
+}
