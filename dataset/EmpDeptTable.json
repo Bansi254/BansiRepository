@@ -1,0 +1,17 @@
+{
+	"name": "EmpDeptTable",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabaseLinkService",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "HumanResources",
+			"table": "empdept"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

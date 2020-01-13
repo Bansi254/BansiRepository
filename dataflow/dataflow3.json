@@ -1,0 +1,55 @@
+{
+	"name": "dataflow3",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "ProductCategory",
+						"type": "DatasetReference"
+					},
+					"name": "ProductCategorySource"
+				},
+				{
+					"dataset": {
+						"referenceName": "ProductCategoryTest",
+						"type": "DatasetReference"
+					},
+					"name": "Destination"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ProductCategoryTest",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				},
+				{
+					"dataset": {
+						"referenceName": "ProductCategoryTest",
+						"type": "DatasetReference"
+					},
+					"name": "sink2"
+				}
+			],
+			"transformations": [
+				{
+					"name": "Join1"
+				},
+				{
+					"name": "ConditionalSplit1"
+				},
+				{
+					"name": "AlterRow1"
+				},
+				{
+					"name": "DerivedColumn1"
+				}
+			],
+			"script": "\n\nsource(output(\n\t\tProductCategoryID as integer,\n\t\tParentProductCategoryID as integer,\n\t\tName as string,\n\t\trowguid as string,\n\t\tModifiedDate as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> ProductCategorySource\nsource(output(\n\t\tProductCategoryID as integer,\n\t\tParentProductCategoryID as integer,\n\t\tName as string,\n\t\trowguid as string,\n\t\tModifiedDate as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> Destination\nProductCategorySource, DerivedColumn1 join(ProductCategorySource@ProductCategoryID == Destination@ProductCategoryID,\n\tjoinType:'left',\n\tbroadcast: 'none')~> Join1\nJoin1 split(isNull(Destination@ProductCategoryID)==true(),\n\tProductCategorySource@ProductCategoryID==Destination@ProductCategoryID,\n\tdisjoint: false) ~> ConditionalSplit1@(Insert, Update, None)\nConditionalSplit1@Update alterRow(updateIf(ConditionalSplit1@Update@Name!=DEST_Name)) ~> AlterRow1\nDestination derive(DEST_Name = Name) ~> DerivedColumn1\nConditionalSplit1@Insert sink(input(\n\t\tProductCategoryID as integer,\n\t\tParentProductCategoryID as integer,\n\t\tName as string,\n\t\trowguid as string,\n\t\tModifiedDate as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tmapColumn(\n\t\tProductCategoryID = {ConditionalSplit1@Insert@ProductCategoryID},\n\t\tParentProductCategoryID = {ConditionalSplit1@Insert@ParentProductCategoryID},\n\t\tName = {ConditionalSplit1@Insert@Name},\n\t\trowguid = {ConditionalSplit1@Insert@rowguid},\n\t\tModifiedDate = {ConditionalSplit1@Insert@ModifiedDate}\n\t)) ~> sink1\nAlterRow1 sink(input(\n\t\tProductCategoryID as integer,\n\t\tParentProductCategoryID as integer,\n\t\tName as string,\n\t\trowguid as string,\n\t\tModifiedDate as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:false,\n\tupdateable:true,\n\tupsertable:false,\n\tkeys:['ProductCategoryID'],\n\tformat: 'table',\n\tmapColumn(\n\t\tProductCategoryID = {ConditionalSplit1@Update@ProductCategoryID},\n\t\tParentProductCategoryID = {ConditionalSplit1@Update@ParentProductCategoryID},\n\t\tName = {ConditionalSplit1@Update@Name},\n\t\trowguid = {ConditionalSplit1@Update@rowguid},\n\t\tModifiedDate = {ConditionalSplit1@Update@ModifiedDate}\n\t)) ~> sink2"
+		}
+	}
+}

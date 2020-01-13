@@ -1,0 +1,49 @@
+{
+	"name": "dataflow1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Employee",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "EmployeeDepartmentHistory",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
+				},
+				{
+					"dataset": {
+						"referenceName": "Department",
+						"type": "DatasetReference"
+					},
+					"name": "source3"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "EmpDeptTable",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "Join1"
+				},
+				{
+					"name": "Join2"
+				}
+			],
+			"script": "\n\nsource(output(\n\t\tBusinessEntityID as integer,\n\t\tNationalIDNumber as string,\n\t\tLoginID as string,\n\t\tOrganizationNode as binary,\n\t\tOrganizationLevel as integer,\n\t\tJobTitle as string,\n\t\tBirthDate as date,\n\t\tMaritalStatus as string,\n\t\tGender as string,\n\t\tHireDate as date,\n\t\tSalariedFlag as boolean,\n\t\tVacationHours as integer,\n\t\tSickLeaveHours as integer,\n\t\tCurrentFlag as boolean,\n\t\tModifiedDate as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tquery: 'select top 10 * from HumanResources.Employee',\n\tformat: 'query') ~> source1\nsource(output(\n\t\tBusinessEntityID as integer,\n\t\tDepartmentID as integer,\n\t\tShiftID as integer,\n\t\tStartDate as date,\n\t\tEndDate as date,\n\t\tModifiedDate as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> source2\nsource(output(\n\t\tDepartmentID as integer,\n\t\tName as string,\n\t\tGroupName as string,\n\t\tModifiedDate as timestamp\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tisolationLevel: 'READ_UNCOMMITTED',\n\tformat: 'table') ~> source3\nsource1, source2 join(source1@BusinessEntityID == source2@BusinessEntityID,\n\tjoinType:'inner',\n\tbroadcast: 'none')~> Join1\nJoin1, source3 join(source2@DepartmentID == source3@DepartmentID,\n\tjoinType:'inner',\n\tbroadcast: 'none')~> Join2\nJoin2 sink(allowSchemaDrift: true,\n\tvalidateSchema: true,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tmapColumn(\n\t\tBusinessEntityID = {source1@BusinessEntityID},\n\t\tNationalIDNumber,\n\t\tJobTitle,\n\t\tBirthDate,\n\t\tMaritalStatus,\n\t\tGender,\n\t\tCurrentFlag,\n\t\tDepartmentID = {source3@DepartmentID},\n\t\tName\n\t)) ~> sink1"
+		}
+	}
+}
