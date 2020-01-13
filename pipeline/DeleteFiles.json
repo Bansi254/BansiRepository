@@ -41,7 +41,7 @@
 			},
 			{
 				"name": "ForEachFile",
-				"description": "Iterate each file, and delete them.",
+				"description": "Iterate each file, and move them one by one.",
 				"type": "ForEach",
 				"dependsOn": [
 					{
